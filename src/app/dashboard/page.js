@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import DataTable from '@/components/DataTable';
 import ResultChart from '@/components/ResultChart';
+import { 
+  MessageSquare, ClipboardList, Edit2, XCircle, 
+  Brain, Zap, Search, CheckCircle, Play, Table, BarChart2, X, Send 
+} from 'lucide-react';
 
 export default function DashboardQuery() {
   // Data sources
@@ -127,7 +131,7 @@ export default function DashboardQuery() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `❌ Error: ${err.message}`,
+        content: `Error: ${err.message}`,
         timestamp: new Date(),
         isError: true
       }]);
@@ -160,10 +164,11 @@ export default function DashboardQuery() {
 
       const assistantMsg = {
         role: 'assistant',
-        content: `✏️ Edited query executed. Found ${data.data?.length || 0} results.`,
+        content: `Edited query executed. Found ${data.data?.length || 0} results.`,
         data: data.data,
         resultCount: data.data?.length || 0,
-        timestamp: new Date()
+        timestamp: new Date(),
+        isEdited: true
       };
 
       setMessages(prev => [...prev, assistantMsg]);
@@ -172,7 +177,7 @@ export default function DashboardQuery() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `❌ Error: ${err.message}`,
+        content: `Error: ${err.message}`,
         timestamp: new Date(),
         isError: true
       }]);
@@ -184,10 +189,10 @@ export default function DashboardQuery() {
   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.data);
 
   const loadingSteps = [
-    { step: 1, icon: '🧠', text: 'Understanding your question...' },
-    { step: 2, icon: '⚡', text: 'Generating query...' },
-    { step: 3, icon: '🔍', text: 'Executing against database...' },
-    { step: 4, icon: '✅', text: 'Processing results...' },
+    { step: 1, icon: <Brain size={16} />, text: 'Understanding your question...' },
+    { step: 2, icon: <Zap size={16} />, text: 'Generating query...' },
+    { step: 3, icon: <Search size={16} />, text: 'Executing against database...' },
+    { step: 4, icon: <CheckCircle size={16} />, text: 'Processing results...' },
   ];
 
   return (
@@ -222,7 +227,7 @@ export default function DashboardQuery() {
         <div className="chat-messages">
           {messages.length === 0 && (
             <div style={{ textAlign: 'center', padding: '4rem 2rem', color: 'var(--text-muted)' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💬</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}><MessageSquare size={48} /></div>
               <p>Start by asking a question about your data.</p>
               <p style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>
                 Try: "Show me all users" or "What's the average order value?"
@@ -232,11 +237,15 @@ export default function DashboardQuery() {
 
           {messages.map((msg, i) => (
             <div key={i} className={`chat-bubble ${msg.role}`}>
-              <div>{msg.content}</div>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                {msg.isError && <XCircle size={18} className="text-danger" style={{ marginTop: '2px' }} />}
+                {msg.isEdited && <Edit2 size={18} className="text-info" style={{ marginTop: '2px' }} />}
+                <div>{msg.content}</div>
+              </div>
 
               {msg.role === 'assistant' && msg.resultCount > 0 && (
                 <div style={{ marginTop: '0.5rem' }}>
-                  <span className="badge badge-success">📋 {msg.resultCount} results</span>
+                  <span className="badge badge-success"><ClipboardList size={14} /> {msg.resultCount} results</span>
                 </div>
               )}
 
@@ -266,7 +275,9 @@ export default function DashboardQuery() {
               <div className="loading-steps">
                 {loadingSteps.map(s => (
                   <div key={s.step} className={`loading-step ${loadingStep >= s.step ? (loadingStep > s.step ? 'done' : 'active') : ''}`}>
-                    <span className="step-icon">{loadingStep > s.step ? '✅' : s.icon}</span>
+                    <span className="step-icon" style={{ display: 'flex' }}>
+                      {loadingStep > s.step ? <CheckCircle size={16} /> : s.icon}
+                    </span>
                     <span>{s.text}</span>
                   </div>
                 ))}
@@ -289,7 +300,7 @@ export default function DashboardQuery() {
               disabled={loading || sources.length === 0}
             />
             <button type="submit" className="search-button" disabled={loading || !input.trim() || sources.length === 0}>
-              {loading ? <div className="loading-spinner" /> : '→'}
+              {loading ? <div className="loading-spinner" /> : <Send size={16} />}
             </button>
           </form>
         </div>
@@ -301,11 +312,11 @@ export default function DashboardQuery() {
           {/* View Toggle + Edit Button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div className="btn-group">
-              <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}>📋 Table</button>
-              <button className={`btn-toggle ${viewMode === 'chart' ? 'active' : ''}`} onClick={() => setViewMode('chart')}>📊 Chart</button>
+              <button className={`btn-toggle ${viewMode === 'table' ? 'active' : ''}`} onClick={() => setViewMode('table')}><Table size={16} /> Table</button>
+              <button className={`btn-toggle ${viewMode === 'chart' ? 'active' : ''}`} onClick={() => setViewMode('chart')}><BarChart2 size={16} /> Chart</button>
             </div>
             <button className="btn-secondary" onClick={() => setIsEditing(!isEditing)}>
-              {isEditing ? '✕ Close Editor' : '✏️ Edit Query'}
+              {isEditing ? <><X size={16} /> Close Editor</> : <><Edit2 size={16} /> Edit Query</>}
             </button>
           </div>
 
@@ -323,7 +334,7 @@ export default function DashboardQuery() {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.8rem' }}>
                 <button className="btn-primary" onClick={handleRunEdited} disabled={loading} style={{ borderRadius: 'var(--radius-sm)' }}>
-                  {loading ? 'Running...' : '▶ Run Edited Query'}
+                  {loading ? 'Running...' : <><Play size={16} /> Run Edited Query</>}
                 </button>
               </div>
             </div>

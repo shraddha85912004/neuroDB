@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import { Link as LinkIcon, Upload, CheckCircle, Lightbulb, Trash2 } from 'lucide-react';
 
 export default function DataSources() {
   const { data: session } = useSession();
@@ -51,7 +52,7 @@ export default function DataSources() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to connect');
 
-      setSuccess(`✅ Connected! Found ${data.tablesFound} tables/collections.`);
+      setSuccess(`Connected! Found ${data.tablesFound} tables/collections.`);
       setName('');
       setUri('');
       fetchSources();
@@ -83,7 +84,7 @@ export default function DataSources() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
 
-      setSuccess(`✅ Uploaded! ${data.rowCount} rows, ${data.columns?.length} columns detected.`);
+      setSuccess(`Uploaded! ${data.rowCount} rows, ${data.columns?.length} columns detected.`);
       setUploadName('');
       if (fileRef.current) fileRef.current.value = '';
       fetchSources();
@@ -127,15 +128,15 @@ export default function DataSources() {
           {/* Tabs */}
           <div className="btn-group" style={{ marginBottom: '1.5rem' }}>
             <button className={`btn-toggle ${activeTab === 'connect' ? 'active' : ''}`} onClick={() => setActiveTab('connect')}>
-              🔗 Connect Database
+              <LinkIcon size={16} /> Connect Database
             </button>
             <button className={`btn-toggle ${activeTab === 'upload' ? 'active' : ''}`} onClick={() => setActiveTab('upload')}>
-              📁 Upload File
+              <Upload size={16} /> Upload File
             </button>
           </div>
 
           {error && <div className="error-message" style={{ marginBottom: '1rem' }}>{error}</div>}
-          {success && <div style={{ background: 'rgba(80, 250, 123, 0.08)', border: '1px solid rgba(80, 250, 123, 0.2)', color: 'var(--success)', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.9rem' }}>{success}</div>}
+          {success && <div style={{ background: 'rgba(80, 250, 123, 0.08)', border: '1px solid rgba(80, 250, 123, 0.2)', color: 'var(--success)', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={16} /> {success}</div>}
 
           {activeTab === 'connect' ? (
             <form onSubmit={handleConnect} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -167,13 +168,13 @@ export default function DataSources() {
                     'postgresql://user:pass@localhost:5432/mydb'
                   }
                 />
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  💡 Tip: Use a read-only database user for maximum security.
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem' }}>
+                  <Lightbulb size={12} /> Tip: Use a read-only database user for maximum security.
                 </span>
               </div>
 
               <button type="submit" className="btn-primary" disabled={adding} style={{ borderRadius: 'var(--radius-sm)' }}>
-                {adding ? 'Analyzing Schema...' : '🔗 Connect & Analyze Schema'}
+                {adding ? 'Analyzing Schema...' : <><LinkIcon size={16} /> Connect & Analyze Schema</>}
               </button>
             </form>
           ) : (
@@ -192,7 +193,7 @@ export default function DataSources() {
               </div>
 
               <button type="submit" className="btn-primary" disabled={uploading} style={{ borderRadius: 'var(--radius-sm)' }}>
-                {uploading ? 'Uploading & Parsing...' : '📁 Upload & Analyze'}
+                {uploading ? 'Uploading & Parsing...' : <><Upload size={16} /> Upload & Analyze</>}
               </button>
             </form>
           )}
@@ -215,8 +216,8 @@ export default function DataSources() {
                   <span className="field-value">{src.name}</span>
                 </div>
                 {isAdmin && (
-                  <button className="btn-danger" style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }} onClick={() => handleDelete(src._id)}>
-                    Delete
+                  <button className="btn-danger" style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => handleDelete(src._id)}>
+                    <Trash2 size={12} /> Delete
                   </button>
                 )}
               </div>

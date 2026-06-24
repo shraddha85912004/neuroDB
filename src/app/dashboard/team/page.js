@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { CheckCircle, Eye, Wrench, UserPlus } from 'lucide-react';
 
 export default function TeamSettings() {
   const { data: session } = useSession();
@@ -39,7 +40,7 @@ export default function TeamSettings() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to add user');
 
-      setSuccess(`✅ User ${email} added as ${role}.`);
+      setSuccess(`User ${email} added as ${role}.`);
       setEmail('');
       setPassword('');
       
@@ -64,7 +65,7 @@ export default function TeamSettings() {
         <h3 style={{ marginBottom: '1rem' }}>Add Team Member</h3>
         <form onSubmit={handleInvite} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {error && <div className="error-message">{error}</div>}
-          {success && <div style={{ background: 'rgba(80, 250, 123, 0.08)', border: '1px solid rgba(80, 250, 123, 0.2)', color: 'var(--success)', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem' }}>{success}</div>}
+          {success && <div style={{ background: 'rgba(80, 250, 123, 0.08)', border: '1px solid rgba(80, 250, 123, 0.2)', color: 'var(--success)', padding: '0.8rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={16} /> {success}</div>}
 
           <div className="form-group">
             <label className="field-label">Email</label>
@@ -79,13 +80,13 @@ export default function TeamSettings() {
           <div className="form-group">
             <label className="field-label">Role</label>
             <select className="form-select" value={role} onChange={e => setRole(e.target.value)}>
-              <option value="viewer">👀 Viewer — Can query data</option>
-              <option value="admin">🔧 Admin — Can manage sources & team</option>
+              <option value="viewer">Viewer — Can query data</option>
+              <option value="admin">Admin — Can manage sources & team</option>
             </select>
           </div>
 
           <button type="submit" className="btn-primary" disabled={adding} style={{ borderRadius: 'var(--radius-sm)' }}>
-            {adding ? 'Adding...' : '➕ Add User'}
+            {adding ? 'Adding...' : <><UserPlus size={16} /> Add User</>}
           </button>
         </form>
       </div>
@@ -100,8 +101,8 @@ export default function TeamSettings() {
               <span className="field-value">{u.email}</span>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <span className={`badge ${u.role === 'admin' ? 'badge-warning' : 'badge-info'}`} style={{ textTransform: 'capitalize' }}>
-                {u.role === 'admin' ? '🔧' : '👀'} {u.role}
+              <span className={`badge ${u.role === 'admin' ? 'badge-warning' : 'badge-info'}`} style={{ textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                {u.role === 'admin' ? <Wrench size={12} /> : <Eye size={12} />} {u.role}
               </span>
             </div>
           </div>

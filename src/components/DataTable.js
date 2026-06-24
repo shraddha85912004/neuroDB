@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { Inbox } from 'lucide-react';
 
 const SKIP_COLUMNS = new Set(['_id', 'id']);
 
@@ -91,7 +92,7 @@ export default function DataTable({ data, columns: columnsProp }) {
   if (!data || data.length === 0) {
     return (
       <div style={styles.emptyContainer}>
-        <span style={styles.emptyIcon}>📭</span>
+        <span style={styles.emptyIcon}><Inbox size={48} /></span>
         <p style={styles.emptyTitle}>No data to display</p>
         <p style={styles.emptySubtitle}>
           Try a different query to see results here.

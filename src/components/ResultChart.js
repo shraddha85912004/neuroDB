@@ -39,6 +39,8 @@ const TOOLTIP_STYLE = {
   labelStyle: { color: '#8b949e', fontWeight: 600, marginBottom: '4px' },
 };
 
+import { BarChart2 } from 'lucide-react';
+
 export default function ResultChart({ data, chartSuggestion }) {
   if (
     !chartSuggestion ||
@@ -48,7 +50,7 @@ export default function ResultChart({ data, chartSuggestion }) {
   ) {
     return (
       <div style={styles.empty}>
-        <span style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📊</span>
+        <span style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}><BarChart2 size={48} /></span>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
           No chart available for this query.
         </p>

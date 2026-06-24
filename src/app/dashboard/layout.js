@@ -4,10 +4,11 @@ import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
+import { Database, Search, History, Users, LogOut, LayoutTemplate } from 'lucide-react';
 
 export default function DashboardLayout({ children }) {
-  const { data: session, status } = useSession();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   if (status === 'loading') {
     return (
@@ -17,44 +18,48 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const navItems = [
-    { href: '/dashboard', icon: '💬', label: 'Query Data' },
-    { href: '/dashboard/datasources', icon: '🗄️', label: 'Data Sources' },
-    { href: '/dashboard/history', icon: '📜', label: 'Query History' },
+  const links = [
+    { href: '/dashboard', label: 'Query Data', icon: <Search size={16} /> },
+    { href: '/dashboard/datasources', label: 'Data Sources', icon: <Database size={16} /> },
+    { href: '/dashboard/history', label: 'History', icon: <History size={16} /> },
   ];
 
   if (session?.user?.role === 'admin') {
-    navItems.push({ href: '/dashboard/team', icon: '👥', label: 'Team Settings' });
+    links.push({ href: '/dashboard/team', label: 'Team Settings', icon: <Users size={16} /> });
   }
 
   return (
     <div style={{ display: 'flex' }}>
       <aside className="sidebar">
-        <div className="sidebar-logo">AI Data Explorer</div>
-        <div className="sidebar-subtitle">SaaS Edition</div>
+        <div className="sidebar-logo">
+          <LayoutTemplate size={20} className="text-accent-color" />
+          <span>NeuroDB</span>
+        </div>
+        <div className="sidebar-subtitle">AI Data Explorer</div>
 
         <nav className="sidebar-nav">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav-link ${pathname === item.href ? 'active' : ''}`}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
+          {links.map(l => (
+            <Link key={l.href} href={l.href} className={`nav-link ${pathname === l.href ? 'active' : ''}`}>
+              <span className="nav-icon">{l.icon}</span>
+              {l.label}
             </Link>
           ))}
         </nav>
 
         <div className="sidebar-footer">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+          {session?.user && (
+            <div style={{ marginBottom: '1rem' }}>
+              <div className="sidebar-user-email">{session.user.email}</div>
+              <span className="sidebar-user-role">{session.user.role}</span>
+            </div>
+          )}
+          
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <ThemeToggle />
-            <span className="sidebar-user-role">{session?.user?.role}</span>
+            <button className="btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => signOut({ callbackUrl: '/login' })}>
+              <LogOut size={16} /> Logout
+            </button>
           </div>
-          <div className="sidebar-user-email">{session?.user?.email}</div>
-          <button onClick={() => signOut({ callbackUrl: '/login' })} className="btn-secondary" style={{ width: '100%', marginTop: '0.5rem' }}>
-            Logout
-          </button>
         </div>
       </aside>
 
