@@ -26,6 +26,8 @@ const MONGO_BLOCKED_KEYWORDS = [
   '$unset',
   '$push',
   '$pull',
+  '$out',
+  '$merge'
 ];
 
 /**

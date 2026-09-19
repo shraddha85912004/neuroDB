@@ -53,16 +53,18 @@ ${historyContext}
 IMPORTANT RULES:
 1. ONLY use collections and fields that exist in the schema above. DO NOT hallucinate field names.
 2. For string matching, ALWAYS use case-insensitive regex. Example: { "city": { "$regex": "new york", "$options": "i" } }
-3. Support complex queries using $and, $or, $gt, $lt, $gte, $lte, $ne, $in, $nin, $exists, $regex
+3. If the user asks for counts, distinct values, grouping, or complex data processing, you MUST use an aggregation pipeline.
 4. Return ONLY a valid JSON object. No markdown.
-5. NEVER generate destructive operations ($delete, $drop, etc.)
+5. NEVER generate destructive operations ($delete, $drop, $out, $merge, etc.)
 
 Format of the JSON object:
 {
   "collection": "string",
-  "filter": { ... },
-  "sort": { "field": 1 },
-  "limit": number,
+  "queryType": "find|aggregate",
+  "filter": { ... }, // Only if queryType is 'find'
+  "sort": { "field": 1 }, // Only if queryType is 'find'
+  "limit": number, // Only if queryType is 'find'
+  "aggregation": [ ... ], // Only if queryType is 'aggregate'. Array of pipeline stages like $match, $group, etc.
   "explanation": "A plain English explanation of what this query does, step by step. Make it understandable by non-technical users.",
   "chartSuggestion": {
     "type": "bar|line|pie|table",
@@ -192,7 +194,8 @@ export async function POST(req) {
             return NextResponse.json({ error: `Unsafe query blocked: ${safety.reason}` }, { status: 400 });
           }
         } else {
-          const safety = validateQuery(JSON.stringify(generatedQuery.filter || {}), 'mongodb');
+          // For MongoDB, validate the entire generated query object (filter or aggregation)
+          const safety = validateQuery(JSON.stringify(generatedQuery), 'mongodb');
           if (!safety.safe) {
             return NextResponse.json({ error: `Unsafe query blocked: ${safety.reason}` }, { status: 400 });
           }
@@ -207,20 +210,28 @@ export async function POST(req) {
           const targetDb = client.db();
           const collection = targetDb.collection(generatedQuery.collection);
 
-          let cursor = collection.find(generatedQuery.filter || {});
-          if (generatedQuery.sort) cursor = cursor.sort(generatedQuery.sort);
-          cursor = cursor.limit(generatedQuery.limit || 50);
-
-          results = await cursor.toArray();
+          if (generatedQuery.queryType === 'aggregate' && generatedQuery.aggregation) {
+            results = await collection.aggregate(generatedQuery.aggregation).toArray();
+          } else {
+            let cursor = collection.find(generatedQuery.filter || {});
+            if (generatedQuery.sort) cursor = cursor.sort(generatedQuery.sort);
+            cursor = cursor.limit(generatedQuery.limit || 50);
+            results = await cursor.toArray();
+          }
           await client.close();
 
         } else if (source.type === 'uploaded') {
           // Query the internal MongoDB collection
           const collection = internalDb.collection(source.internalCollection);
-          let cursor = collection.find(generatedQuery.filter || {});
-          if (generatedQuery.sort) cursor = cursor.sort(generatedQuery.sort);
-          cursor = cursor.limit(generatedQuery.limit || 50);
-          results = await cursor.toArray();
+          
+          if (generatedQuery.queryType === 'aggregate' && generatedQuery.aggregation) {
+            results = await collection.aggregate(generatedQuery.aggregation).toArray();
+          } else {
+            let cursor = collection.find(generatedQuery.filter || {});
+            if (generatedQuery.sort) cursor = cursor.sort(generatedQuery.sort);
+            cursor = cursor.limit(generatedQuery.limit || 50);
+            results = await cursor.toArray();
+          }
 
         } else if (source.type === 'mysql') {
           const connection = await mysql.createConnection(source.uri);
