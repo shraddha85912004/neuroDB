@@ -2,6 +2,13 @@
 
 AI Data Explorer is a secure, multi-tenant SaaS application that allows users to query complex databases using plain English. Built with Next.js, NextAuth, and the Google Gemini API, it acts as a universal data layer and AI analyst for your organization.
 
+### 📸 Screenshots
+![Landing Page](docs/landing.png)
+
+![Query Dashboard](docs/dashboard.png)
+
+![Data Sources Management](docs/datasources.png)
+
 ## ✨ Features
 
 - **Multi-Database Support**: Connect natively to **PostgreSQL**, **MySQL**, and **MongoDB**.
